@@ -1,20 +1,13 @@
-use libmavsdk::System;
-use std::io::{self, Write};
+use libmavsdk::info;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args: Vec<String> = std::env::args().skip(1).collect();
+    let mut version_service =
+        info::info_service_client::InfoServiceClient::connect("http://0.0.0.0:50051").await?;
 
-    if args.len() > 1 {
-        io::stderr()
-            .write_all(b"Usage: info [connection_url]\n")
-            .unwrap();
-        std::process::exit(1);
-    }
-
-    let url = args.first().cloned();
-
-    let version = System::connect(url).await?.info.get_version().await?;
+    let version = version_service
+        .get_version(info::GetVersionRequest::default())
+        .await?;
 
     println!("Version received: {version:?}");
 

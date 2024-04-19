@@ -1,18 +1,18 @@
 const PROTO_INCLUDE_PATH: &str = "proto/protos";
 
 const PLUGINS: &[&str] = &[
-    //"action",
-    //"calibration",
-    //"camera",
-    //"core",
-    //"geofence",
-    //"gimbal",
+    "action",
+    "calibration",
+    "camera",
+    "core",
+    "geofence",
+    "gimbal",
     "info",
-    //"mission",
+    "mission",
     "mocap",
-    //"offboard",
-    //"param",
-    //"shell",
+    "offboard",
+    "param",
+    "shell",
     "telemetry",
 ];
 
@@ -22,6 +22,7 @@ fn main() -> std::io::Result<()> {
 
         tonic_build::configure()
             .build_server(false)
+            .out_dir("src/grpc/")
             .compile(&[proto_path.as_str()], &[PROTO_INCLUDE_PATH])?;
     }
     Ok(())

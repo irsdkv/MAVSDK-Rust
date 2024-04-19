@@ -1,29 +1,23 @@
-use futures_util::stream::StreamExt;
-use libmavsdk::System;
-use std::io::{self, Write};
+use futures_util::StreamExt;
+use libmavsdk::telemetry;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let args: Vec<String> = std::env::args().skip(1).collect();
-
-    if args.len() > 1 {
-        io::stderr()
-            .write_all(b"Usage: telemetry [connection_url]\n")
-            .unwrap();
-        std::process::exit(1);
-    }
-
-    let url = args.first().cloned();
-
-    let mut stream_odometry = System::connect(url)
-        .await?
-        .telemetry
-        .subscribe_odometry()
+    let mut telemetry_service =
+        telemetry::telemetry_service_client::TelemetryServiceClient::connect(
+            "http://0.0.0.0:50051",
+        )
         .await?;
 
-    while let Some(odometry) = stream_odometry.next().await {
-        println!("Received: {:?}", odometry?);
+    let mut odometry_stream = telemetry_service
+        .subscribe_odometry(telemetry::SubscribeOdometryRequest::default())
+        .await?
+        .into_inner();
+
+    while let Some(odometry) = odometry_stream.next().await {
+        let asd = odometry.unwrap();
+        println!("asd {:?}", asd)
     }
-    println!("Exit");
+
     Ok(())
 }
